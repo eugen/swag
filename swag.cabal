@@ -1,0 +1,13 @@
+name            : swag
+version         : 0.0.1
+build-type      : Simple
+Cabal-Version   : >= 1.2
+
+Executable      swag
+ hs-source-dirs  : .
+ main-is         : swag.hs
+ other-modules   :
+ build-depends   :base >= 3
+ ghc-options     : -Wall -threaded -fno-warn-orphans
+
+
