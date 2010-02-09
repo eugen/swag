@@ -25,7 +25,7 @@ getDirectoryContentsEx dir =
     partitionM (\ d -> doesDirectoryExist (dir </> d))
 
 partitionM :: (Monad m) => (a -> m Bool) -> [a] -> m ([a], [a])
-partitionM f xs = foldM (\ (lh, rh) e -> f e >>= (\e' -> return (if e' then (e:lh,rh) else (lh,e:rh)))) ([],[]) $ reverse xs
+partitionM f xs = foldM (\ (l,r) e -> f e >>= return . ((e:l,r) ?? (l,e:r))) ([],[]) $ reverse xs
 
 data Page = Page {
       fileName :: String, 
