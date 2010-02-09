@@ -25,7 +25,7 @@ getDirectoryContentsEx dir =
     partitionM (\ d -> doesDirectoryExist (dir </> d))
 
 partitionM :: (Monad m) => (a -> m Bool) -> [a] -> m ([a], [a])
-partitionM f xs = foldM (\ (l,r) e -> f e >>= return . ((e:l,r) ?? (l,e:r))) ([],[]) $ reverse xs
+partitionM f xs = foldM (\ (l,r) e -> return . ((e:l,r) ?? (l,e:r)) =<< f e) ([],[]) $ reverse xs
 
 data Page = Page {
       fileName :: String, 
@@ -34,7 +34,7 @@ data Page = Page {
     }
 
 data PageDir = PageDir {
-      dirName :: String, 
+      dirName :: String,
       pages :: [Page], 
       templates :: STGroup String,
       children :: [PageDir] 
@@ -67,12 +67,23 @@ loadContent path parentTemplates = do
   templates <- return $ mergeSTGroups ownTemplates parentTemplates
   children <- mapM (flip loadContent templates) (map (path </>) subDirs)
   return (PageDir dirName pages templates children)
-                  
+
 buildSite :: String -> IO ()
 buildSite dir = do
   content <- loadContent dir nullGroup
+  buildDir "/" content
   return ()
-  
+
+buildDir :: String -> PageDir -> IO ()
+buildDir relPath (PageDir dirName pages templates children) =
+    let attributes = [
+         ("relPath", [relPath]),
+         ("children", [dirName c | c <- children]),
+         ("pages", map fileName pages)]
+    in
+      putStrLn attributes
+         
+
 -- buildDir :: STGroup String -> String -> IO ()
 -- buildDir parentTemplates dir = do
 --   hasOwnTemplates <- doesDirectoryExist (dir </> "templates")
@@ -95,3 +106,4 @@ buildSite dir = do
 --     template'' <- return $ setManyAttrib attribs template' --foldl (flip setManyAttrib) template' attribs
 --     html <- return $ render $ template''
 --     writeFile (replaceExtension file ".html") html
+
