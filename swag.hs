@@ -21,6 +21,9 @@ import System.Process (readProcess, readProcessWithExitCode)
 (~>) = flip ($)
 infixl 1 ~>
 
+emptyGroup :: STGroup String 
+emptyGroup = groupStringTemplates []
+
 getDirectoryContentsEx dir = 
     getDirectoryContents dir >>= 
     return . filter (not.(== '.').head) >>= 
@@ -71,14 +74,14 @@ loadContent path parentTemplates = do
   dirName <- return $ takeFileName path
   (subDirs,pageFiles) <- getDirectoryContentsEx path >>= (\ (subdirs,files) -> return (subdirs,pageFiles files))
   pages <- mapM (loadPage.(path </>)) pageFiles
-  ownTemplates <- doesDirectoryExist (path </> "templates") >>= directoryGroup (path </> "templates") ?? return nullGroup
+  ownTemplates <- doesDirectoryExist (path </> "templates") >>= directoryGroup (path </> "templates") ?? return emptyGroup
   templates <- return $ mergeSTGroups ownTemplates parentTemplates
   children <- mapM (flip loadContent templates) (map (path </>) subDirs)
   return (PageDir path dirName pages templates children)
 
 buildSite :: String -> IO ()
 buildSite dir = do
-  content <- loadContent dir nullGroup
+  content <- loadContent dir emptyGroup
   buildDir "/" content
   return ()
 
@@ -86,7 +89,7 @@ buildPage templates attributes page@(Page file title content published) =
     let
         templates' = maybe templates
                      (\ t -> mergeSTGroups (groupStringTemplates [("content", t)]) templates)
-                     (getStringTemplate' file templates)
+                     (getStringTemplate file templates)
         template = fromJust (getStringTemplate "index" templates')
         attributes' = attributes ++ [("content", [content]), ("title", [title]), ("published", [show published])]
         templateAttr = setManyAttrib attributes' template 
@@ -99,7 +102,9 @@ buildDir relPath (PageDir path dir pages templates children) =
          ("relPath", [relPath]),
          ("children", [dirName c | c <- children]),
          ("pages", map pageFile pages)]
+        writePage p@(Page {pageFile=file}) = writeFile (path </> file ++ ".html") (buildPage templates attributes p)
     in do
-      mapM_ (\ p@(Page {pageFile=file}) -> writeFile (path </> file ++ ".html") (buildPage templates attributes p)) pages
+      mapM_ writePage pages
       mapM_ (\c -> buildDir (relPath ++ dirName c ++ "/") c) children
+
          
