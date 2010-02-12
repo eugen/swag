@@ -4,8 +4,9 @@ import Prelude
 import Data.Char
 import Data.List
 import Data.Maybe
-import Data.Time
+import Data.Time.Format
 import Data.Time.Clock
+import Data.Time.Calendar
 import Control.Monad
 import Text.StringTemplate
 import Text.Pandoc
@@ -35,11 +36,35 @@ getDirectoryContentsEx dir =
 partitionM :: (Monad m) => (a -> m Bool) -> [a] -> m ([a], [a])
 partitionM f xs = foldM (\ (l,r) e -> return . ((e:l,r) ?? (l,e:r)) =<< f e) ([],[]) $ reverse xs
 
+a >>> b = (unsafePerformIO $ putStrLn $ show a) `seq` b
+
+ordinalize :: (Integral a) => a -> String
+ordinalize n 
+    | elem n [11..13] = show n ++ "th"
+    | n `mod` 10 == 1 = show n ++ "st"
+    | n `mod` 10 == 2 = show n ++ "nd"
+    | n `mod` 10 == 3 = show n ++ "rd"
+
+prettyDate :: UTCTime -> String
+prettyDate date@(UTCTime day seconds) = 
+    pd date dDays dHours dMinutes
+    where 
+      now@(UTCTime nowDay nowSeconds) = unsafePerformIO getCurrentTime
+      dDays = diffDays nowDay day
+      (dHours, dMinutes) = divMod (floor $ toRational ((nowSeconds - seconds) / 60)) 60
+      pd date d h m 
+          | d == 0 && h == 0 && m < 5 = "just posted!"
+          | d == 0 && h == 0 = (show m) ++ " minutes ago"
+          | d == 0 = show h ++ " hour" ++ ("s " ?? " ") (h > 1) ++ show m ++ " minutes ago"
+          | d == 1 = "yesterday"
+          | d < 5 = show d ++ " days ago"
+          | otherwise = formatTime defaultTimeLocale ("%e %B %Y") date
+
 data Page = Page {
       pageFile :: String, 
       pageTitle :: String,
       pageContent :: String, 
-      pagePublished :: UTCTime 
+      pagePublished :: UTCTime
     }
 
 data PageDir = PageDir {
@@ -70,7 +95,11 @@ loadPage path = do
   content <- readFile path
   published <- commitDate path
   fileName <- return (dropExtension $ takeFileName path)
-  return $ Page fileName (getPageTitle content) ((writeHtmlString defaultWriterOptions . readMarkdown defaultParserState) content) published
+  return $ Page 
+         fileName 
+         (getPageTitle content) 
+         ((writeHtmlString defaultWriterOptions . readMarkdown defaultParserState) content) 
+         published
 
 loadContent :: String -> STGroup String -> IO PageDir 
 loadContent path parentTemplates = do
@@ -94,7 +123,10 @@ buildPage templates attributes page@(Page file title content published) =
                      (\ t -> mergeSTGroups (groupStringTemplates [("content", t)]) templates)
                      (getStringTemplate file templates)
         template = fromJust (getStringTemplate "index" templates')
-        attributes' = attributes ++ [("content", [content]), ("title", [title]), ("published", [show published])]
+        attributes' = attributes ++ [
+                       ("content", [content]), 
+                       ("title", [title]), 
+                       ("published", [prettyDate published])]
         templateAttr = setManyAttrib attributes' template 
     in
        render templateAttr
