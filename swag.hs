@@ -1,6 +1,7 @@
 module Main
 where
 import Prelude
+import Data.Char
 import Data.List
 import Data.Maybe
 import Data.Time
@@ -20,6 +21,8 @@ import System.Process (readProcess, readProcessWithExitCode)
 
 (~>) = flip ($)
 infixl 1 ~>
+
+capitalize = tail.concat.map (\ w -> ' ' : (toUpper.head $ w) : (tail w)).words
 
 emptyGroup :: STGroup String 
 emptyGroup = groupStringTemplates []
@@ -101,7 +104,9 @@ buildDir relPath (PageDir path dir pages templates children) =
     let attributes = [
          ("relPath", [relPath]),
          ("children", [dirName c | c <- children]),
-         ("pages", map pageFile pages)]
+         ("pages", map pageFile pages)] ++ [
+         ("children" ++ capitalize childName ++ "Contents", map pageContent childPages) | PageDir{dirName=childName,dirPages=childPages} <- children] ++ [
+         ("children" ++ capitalize childName ++ "Titles", map pageTitle childPages) | PageDir{dirName=childName,dirPages=childPages} <- children]
         writePage p@(Page {pageFile=file}) = writeFile (path </> file ++ ".html") (buildPage templates attributes p)
     in do
       mapM_ writePage pages
