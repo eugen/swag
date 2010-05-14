@@ -45,20 +45,10 @@ ordinalize n
     | n `mod` 10 == 2 = show n ++ "nd"
     | n `mod` 10 == 3 = show n ++ "rd"
 
-prettyDate :: UTCTime -> String
-prettyDate date@(UTCTime day seconds) = 
-    pd date dDays dHours dMinutes
-    where 
-      now@(UTCTime nowDay nowSeconds) = unsafePerformIO getCurrentTime
-      dDays = diffDays nowDay day
-      (dHours, dMinutes) = divMod (floor $ toRational ((nowSeconds - seconds) / 60)) 60
-      pd date d h m 
-          | d == 0 && h == 0 && m < 5 = "just posted!"
-          | d == 0 && h == 0 = (show m) ++ " minutes ago"
-          | d == 0 = show h ++ " hour" ++ ("s " ?? " ") (h > 1) ++ show m ++ " minutes ago"
-          | d == 1 = "yesterday"
-          | d < 5 = show d ++ " days ago"
-          | otherwise = formatTime defaultTimeLocale ("%e %B %Y") date
+-- TODO: format dates web2.0-style (e.g. "yesterday", "3 days ago") from javascript;
+formatDate :: UTCTime -> String
+formatDate date = 
+    formatTime defaultTimeLocale ("%e %B %Y") date
 
 data Page = Page {
       pageFile :: String, 
@@ -87,8 +77,8 @@ commitDate path = do
   maybe getCurrentTime return (parseTime defaultTimeLocale "%s" dateStr)
 
 getPageTitle content = 
-    if take 2 title == "% " then drop 2 title else "Untitled"
-        where title = head $ lines content
+    if take 2 firstLine == "% " then drop 2 firstLine else "Untitled"
+        where firstLine = head $ lines content
             
 loadPage :: String -> IO Page
 loadPage path = do
@@ -106,16 +96,10 @@ loadContent path parentTemplates = do
   dirName <- return $ takeFileName path
   (subDirs,pageFiles) <- getDirectoryContentsEx path >>= (\ (subdirs,files) -> return (subdirs,pageFiles files))
   pages <- mapM (loadPage.(path </>)) pageFiles
-  ownTemplates <- doesDirectoryExist (path </> "templates") >>= directoryGroup (path </> "templates") ?? return emptyGroup
+  ownTemplates <- doesDirectoryExist (path </> "#") >>= directoryGroup (path </> "#") ?? return emptyGroup
   templates <- return $ mergeSTGroups ownTemplates parentTemplates
   children <- mapM (flip loadContent templates) (map (path </>) subDirs)
   return (PageDir path dirName pages templates children)
-
-buildSite :: String -> IO ()
-buildSite dir = do
-  content <- loadContent dir emptyGroup
-  buildDir "/" content
-  return ()
 
 buildPage templates attributes page@(Page file title content published) =
     let
@@ -126,7 +110,7 @@ buildPage templates attributes page@(Page file title content published) =
         attributes' = attributes ++ [
                        ("content", [content]), 
                        ("title", [title]), 
-                       ("published", [prettyDate published])]
+                       ("published", [formatDate published])]
         templateAttr = setManyAttrib attributes' template 
     in
        render templateAttr
@@ -144,4 +128,9 @@ buildDir relPath (PageDir path dir pages templates children) =
       mapM_ writePage pages
       mapM_ (\c -> buildDir (relPath ++ dirName c ++ "/") c) children
 
-         
+buildSite :: String -> IO ()
+buildSite dir = do
+  content <- loadContent dir emptyGroup
+  buildDir "/" content
+  return ()
+

@@ -1,0 +1,137 @@
+* {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    font-family: Calibri, Verdana, 'Liberation Sans', 'DejaVu Sans', Sans, sans-serif;
+}
+
+h1, h3 {
+    font-family: 'Cambria', 'DejaVu Serif', serif;
+}
+
+body {
+    width: 780px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    font-size: 16px;
+}
+
+a {
+    color: #AA0000;
+    text-decoration: underline !important;
+}
+
+div#header {
+    top: 0px;
+    background-position: 58% 10px;
+    border-top: 2px solid #AA0000;
+    border-bottom: 2px solid #AA0000;
+    padding-bottom: 8px;
+    padding-left: 27%;
+}
+
+div#header h1 {
+    color: #A00;
+    font-size: 33px;
+}
+
+div#header h2 {
+    font-size: 16px;
+    font-weight: normal;
+}
+
+div#header em {
+    font-style: normal;
+    color: #FF0000;
+}
+
+div#content {
+    width: 63%;
+    float: right;
+    padding-right: 10%;
+}
+
+div#sidebar {
+    padding: 1%;
+    float: left;
+    width: 23%;
+    text-align: right;
+    padding-top: 15px;
+}
+
+div#sidebar h2 {
+    font-size: 20px;
+    font-weight: normal;
+}
+
+div#sidebar li {
+    clear: both;
+    margin-bottom: 6px;
+}
+
+div#footer {
+    clear: both;
+    width: 63%;
+    float: right;
+    padding: 10px 10% 10px 27%;
+    border-top: 2px solid #AA0000;
+    border-bottom: 2px solid #AA0000;
+}
+
+ul.tags li {
+    display: inline;
+    padding-right: 3px;
+}
+
+ul.articles > li {
+    padding-top: 10px;
+    margin-bottom: 4px;
+    border-top: dashed 1px #AA0000;
+}
+ul.articles > li:first-child {
+    border: none;
+}
+
+ul.articles li h3 {
+    font-size: 25px;
+    color: rgb(172, 0, 0);
+}
+
+/****************************/
+/* GoodReads widget styling */
+
+.gr_grid_container { 
+    /* customize grid container div here. eg: width: 500px; */ 
+}
+
+.gr_grid_container br {
+    display: none;
+}
+
+.gr_grid_book_container { 
+    /* customize book cover container div here */ 
+    max-height: 300px; 
+    overflow: hidden; 
+}
+
+.gr_grid_branding {
+    display: none;
+}
+
+#goodreadsWidget>h2 {
+    background-image: url('http://www.goodreads.com/favicon.ico');
+    background-repeat: no-repeat;
+    background-position: center left;
+    padding-left: 18px;
+    display: inline;
+
+}
+
+/****************************/
+/* Delicious widget styling */
+.delicious-post {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+}

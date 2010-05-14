@@ -1,0 +1,37 @@
+% Pandoc User's Guide
+
+Pandoc is a [Haskell] library for converting from one markup format to
+another, and a command-line tool that uses this library. It can read
+[markdown] and (subsets of) [reStructuredText], [HTML], and [LaTeX]; and
+it can write [markdown], [reStructuredText], [HTML], [LaTeX], [ConTeXt],
+[RTF], [DocBook XML], [OpenDocument XML], [ODT], [GNU Texinfo],
+[MediaWiki markup], [groff man] pages, and [S5] HTML slide shows.
+Pandoc's enhanced version of markdown includes syntax for footnotes,
+tables, flexible ordered lists, definition lists, delimited code blocks,
+superscript, subscript, strikeout, title blocks, automatic tables of
+contents, embedded LaTeX math, and markdown inside HTML block elements.
+(These enhancements can be disabled if a drop-in replacement for
+`Markdown.pl` is desired.)
+
+In contrast to most existing tools for converting markdown to HTML, which
+use regex substitutions, Pandoc has a modular design: it consists of a
+set of readers, which parse text in a given format and produce a native
+representation of the document, and a set of writers, which convert
+this native representation into a target format. Thus, adding an input
+or output format requires only adding a reader or writer.
+
+[markdown]: http://daringfireball.net/projects/markdown/
+[reStructuredText]: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
+[S5]: http://meyerweb.com/eric/tools/s5/
+[HTML]:  http://www.w3.org/TR/html40/
+[LaTeX]: http://www.latex-project.org/
+[ConTeXt]: http://www.pragma-ade.nl/ 
+[RTF]:  http://en.wikipedia.org/wiki/Rich_Text_Format
+[DocBook XML]:  http://www.docbook.org/
+[OpenDocument XML]: http://opendocument.xml.org/ 
+[ODT]: http://en.wikipedia.org/wiki/OpenDocument
+[MediaWiki markup]: http://www.mediawiki.org/wiki/Help:Formatting
+[groff man]: http://developer.apple.com/DOCUMENTATION/Darwin/Reference/ManPages/man7/groff_man.7.html
+[Haskell]:  http://www.haskell.org/
+[GNU Texinfo]: http://www.gnu.org/software/texinfo/
+

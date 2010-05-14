@@ -1,0 +1,10 @@
+explica cum am adaugat:
+- un not tip @website
+  <pre>
+  @website { antlr,
+  title = "The {ANTLR} Parser Generator",
+  url = "http://www.antlr.org"
+  }
+  </pre>
+- cum am facut sa se afișeze url-ul
+

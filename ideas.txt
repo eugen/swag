@@ -1,0 +1,10 @@
+dir structure: 
+@template
+pages - normal dir name
+#posts - '#' prefix - automatically paginate
+  - index.html
+  - page2.html
+  - page3.html
+
+other:
+files with the .pan extensions will be compiled; the other copied
