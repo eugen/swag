@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-    <title>Title</title>
+    <title>$title$ - Title</title>
     <link rel="stylesheet" type="text/css" href="static/style.css" />
     <link rel="stylesheet" type="text/css" href="../static/style.css" />
   </head>
@@ -11,7 +11,8 @@
       $header()$
     </div>
     <div id="content">
-      $content()$
+      <h2>$title$</h2>
+      $content$
     </div>
     <div id="sidebar">
       $sidebar()$

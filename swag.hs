@@ -19,24 +19,15 @@ import System.Directory
 import System.FilePath 
 import System.Process (readProcess, readProcessWithExitCode)
 
-
+-- utility functions
 (~>) = flip ($)
 infixl 1 ~>
-
-capitalize = tail.concat.map (\ w -> ' ' : (toUpper.head $ w) : (tail w)).words
-
-emptyGroup :: STGroup String 
-emptyGroup = groupStringTemplates []
-
-getDirectoryContentsEx dir = 
-    getDirectoryContents dir >>= 
-    return . filter (not.(== '.').head) >>= 
-    partitionM (\ d -> doesDirectoryExist (dir </> d))
 
 partitionM :: (Monad m) => (a -> m Bool) -> [a] -> m ([a], [a])
 partitionM f xs = foldM (\ (l,r) e -> return . ((e:l,r) ?? (l,e:r)) =<< f e) ([],[]) $ reverse xs
 
 a >>> b = (unsafePerformIO $ putStrLn $ show a) `seq` b
+p a = (unsafePerformIO $ putStrLn $ show a) `seq` a
 
 ordinalize :: (Integral a) => a -> String
 ordinalize n 
@@ -50,6 +41,12 @@ formatDate :: UTCTime -> String
 formatDate date = 
     formatTime defaultTimeLocale ("%e %B %Y") date
 
+-- data declarations
+data Site = Site {
+      sitePages :: [Page], 
+      siteTemplates :: STGroup String
+    }
+
 data Page = Page {
       pageFile :: String, 
       pageTitle :: String,
@@ -57,16 +54,9 @@ data Page = Page {
       pagePublished :: UTCTime
     }
 
-data PageDir = PageDir {
-      dirPath :: String,
-      dirName :: String,
-      dirPages :: [Page], 
-      dirTemplates :: STGroup String,
-      dirChildren :: [PageDir] 
-    }
-
-pageFiles files = 
-    filter ((== ".pandoc").takeExtension) files
+-- teh program
+isPageFile file = 
+    ((== ".pandoc").takeExtension) file
 
 commitDate :: String -> IO UTCTime
 commitDate path = do
@@ -76,61 +66,61 @@ commitDate path = do
   setCurrentDirectory oldcd
   maybe getCurrentTime return (parseTime defaultTimeLocale "%s" dateStr)
 
-getPageTitle content = 
-    if take 2 firstLine == "% " then drop 2 firstLine else "Untitled"
-        where firstLine = head $ lines content
-            
 loadPage :: String -> IO Page
 loadPage path = do
   content <- readFile path
-  published <- commitDate path
+  title <- return $ loadMeta content 0
+  published <- return $ loadMeta content 2
   fileName <- return (dropExtension $ takeFileName path)
+  commitDate' <- commitDate path
   return $ Page 
          fileName 
-         (getPageTitle content) 
+         (fromMaybe fileName title)
          ((writeHtmlString defaultWriterOptions . readMarkdown defaultParserState) content) 
-         published
+         (fromMaybe commitDate' (parseTime defaultTimeLocale "%Y-%m-%d %H:%M" (fromMaybe ""  published)))
+    where loadMeta content line = 
+              let ls = lines content in
+              if ((length ls) >= line && head (ls !! line) == '%')
+              then Just (ls !! line ~> drop 1 ~> dropWhile (== ' '))
+              else Nothing
 
-loadContent :: String -> STGroup String -> IO PageDir 
-loadContent path parentTemplates = do
-  dirName <- return $ takeFileName path
-  (subDirs,pageFiles) <- getDirectoryContentsEx path >>= (\ (subdirs,files) -> return (subdirs,pageFiles files))
-  pages <- mapM (loadPage.(path </>)) pageFiles
-  ownTemplates <- doesDirectoryExist (path </> "#") >>= directoryGroup (path </> "#") ?? return emptyGroup
-  templates <- return $ mergeSTGroups ownTemplates parentTemplates
-  children <- mapM (flip loadContent templates) (map (path </>) subDirs)
-  return (PageDir path dirName pages templates children)
-
-buildPage templates attributes page@(Page file title content published) =
+buildPage :: StringTemplate String -> Page -> String
+buildPage template page@(Page file title content published) =
     let
-        templates' = maybe templates
-                     (\ t -> mergeSTGroups (groupStringTemplates [("content", t)]) templates)
-                     (getStringTemplate file templates)
-        template = fromJust (getStringTemplate "index" templates')
-        attributes' = attributes ++ [
+        attributes = [
                        ("content", [content]), 
                        ("title", [title]), 
                        ("published", [formatDate published])]
-        templateAttr = setManyAttrib attributes' template 
+        templateAttr = setManyAttrib attributes template 
     in
        render templateAttr
 
-buildDir :: String -> PageDir -> IO ()
-buildDir relPath (PageDir path dir pages templates children) =
-    let attributes = [
-         ("relPath", [relPath]),
-         ("children", [dirName c | c <- children]),
-         ("pages", map pageFile pages)] ++ [
-         ("children" ++ capitalize childName ++ "Contents", map pageContent childPages) | PageDir{dirName=childName,dirPages=childPages} <- children] ++ [
-         ("children" ++ capitalize childName ++ "Titles", map pageTitle childPages) | PageDir{dirName=childName,dirPages=childPages} <- children]
-        writePage p@(Page {pageFile=file}) = writeFile (path </> file ++ ".html") (buildPage templates attributes p)
-    in do
-      mapM_ writePage pages
-      mapM_ (\c -> buildDir (relPath ++ dirName c ++ "/") c) children
+
+getFilesR :: String -> IO [String]
+getFilesR path = do
+  e <- doesDirectoryExist path
+  if e
+       then getDirectoryContents path >>= filterM (return.not.(flip elem ['.', '_']).head)  >>= mapM (getFilesR.(path </>)) >>= ((return.join :: [[a]] -> IO [a]))
+       else return [path]
+
 
 buildSite :: String -> IO ()
 buildSite dir = do
-  content <- loadContent dir emptyGroup
-  buildDir "/" content
+  templates <- directoryGroup (dir </> "_templates") :: IO (STGroup String)
+  (pages, static) <- getFilesR dir >>= partitionM (return.isPageFile)
+  outDir <- return (dir </> "_site")
+  (doesDirectoryExist outDir >>= (removeDirectoryRecursive outDir) ?? (return ()))
+  createDirectory outDir
+  mapM (\ f ->
+          let outFile = (outDir </> makeRelative dir f) in
+          createDirectoryIfMissing True (takeDirectory outFile) >> copyFile f outFile) static
+  indexTemplate <- return $ fromJust (getStringTemplate "index" templates)
+  mapM (\ p -> do
+          page <- loadPage p
+          outFile <- return (outDir </> makeRelative dir (dropExtensions p) ++ ".html")
+          createDirectoryIfMissing True (takeDirectory outFile)
+          html <- return $ buildPage indexTemplate page
+          writeFile outFile html) pages
+
   return ()
 

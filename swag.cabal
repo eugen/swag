@@ -7,7 +7,7 @@ Executable      swag
  hs-source-dirs  : .
  main-is         : swag.hs
  other-modules   :
- build-depends   :base >= 3
+ build-depends   : base >= 3, higherorder, pandoc, process, filepath, directory, old-locale, haskell98, HStringTemplate, time
  ghc-options     : -Wall -threaded -fno-warn-orphans
 
 
