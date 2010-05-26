@@ -5,7 +5,7 @@
 <li id="goodreadsWidget">
   <!-- BEGIN GoodReads widget -->
   <!-- <script src="http://www.goodreads.com/review/grid_widget/1856350.Currently%20reading?cover_size=medium&amp;num_books=20&amp;order=d&amp;shelf=currently-reading&amp;sort=date_added&amp;widget_id=1264628778" type="text/javascript" charset="utf-8"> -->
-  </script>
+  <!-- </script> -->
   <!-- END of GoodReads widget -->
 </li>
 <li id="deliciousWidget" style="clear: both">

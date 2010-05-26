@@ -27,7 +27,7 @@ partitionM :: (Monad m) => (a -> m Bool) -> [a] -> m ([a], [a])
 partitionM f xs = foldM (\ (l,r) e -> return . ((e:l,r) ?? (l,e:r)) =<< f e) ([],[]) $ reverse xs
 
 a >>> b = (unsafePerformIO $ putStrLn $ show a) `seq` b
-p a = (unsafePerformIO $ putStrLn $ show a) `seq` a
+p a = (unsafePerformIO $ putStrLn $ take 150 $ show a) `seq` a
 
 ordinalize :: (Integral a) => a -> String
 ordinalize n 
@@ -38,8 +38,10 @@ ordinalize n
 
 -- TODO: format dates web2.0-style (e.g. "yesterday", "3 days ago") from javascript;
 formatDate :: UTCTime -> String
-formatDate date = 
-    formatTime defaultTimeLocale ("%e %B %Y") date
+formatDate = formatTime defaultTimeLocale ("%e %B %Y")
+
+formatDateAtom :: UTCTime -> String
+formatDateAtom = formatTime defaultTimeLocale ("%FT%TZ")
 
 -- data declarations
 data Site = Site {
@@ -76,7 +78,7 @@ loadPage path = do
   return $ Page 
          fileName 
          (fromMaybe fileName title)
-         ((writeHtmlString defaultWriterOptions . readMarkdown defaultParserState) content) 
+         ((writeHtmlString defaultWriterOptions.readMarkdown defaultParserState) content)
          (fromMaybe commitDate' (parseTime defaultTimeLocale "%Y-%m-%d %H:%M" (fromMaybe ""  published)))
     where loadMeta content line = 
               let ls = lines content in
@@ -87,10 +89,9 @@ loadPage path = do
 buildPage :: StringTemplate String -> Page -> String
 buildPage template page@(Page file title content published) =
     let
-        attributes = [
-                       ("content", [content]), 
-                       ("title", [title]), 
-                       ("published", [formatDate published])]
+        attributes = [("content", [content]), 
+                      ("title", [title]), 
+                      ("published", [formatDate published])]
         templateAttr = setManyAttrib attributes template 
     in
        render templateAttr
@@ -104,6 +105,35 @@ getFilesR path = do
        else return [path]
 
 
+getAttribs posts = [
+ ("updated", [formatDateAtom $ pagePublished (last posts)]),
+ ("updatedAtom", [formatDateAtom $ pagePublished (last posts)]),
+ ("postTitles", (map pageTitle posts)),
+ ("postContents", (map pageContent posts)),
+ ("postDates", map (formatDate.pagePublished) posts),
+ ("postDatesAtom", map (formatDateAtom.pagePublished) posts),
+ ("postAddresses", map ((++ ".html").pageFile) posts)]
+
+buildBlog :: STGroup String -> FilePath -> FilePath -> IO ()
+buildBlog templates postsDir outDir = 
+    let [postTemplate, blogTemplate, feedTemplate] = map (fromJust.flip getStringTemplate templates) ["post", "blog", "feed"] in
+    do
+      posts <- getDirectoryContents postsDir >>= 
+               filterM (return.isPageFile) >>= 
+               mapM (loadPage.(postsDir </>)) >>= 
+               return.(sortBy (\ p1 p2 -> (pagePublished p1) `compare` (pagePublished p2)))
+      createDirectoryIfMissing True outDir
+      -- build each post
+      mapM (\ p -> writeFile 
+            (outDir </> (dropExtension (pageFile p)) ++ ".html")
+            (buildPage postTemplate p)) posts
+
+      -- build the index
+      writeFile (outDir </> "index.html") (render $ setManyAttrib (getAttribs posts) blogTemplate)
+      -- build the feed
+      writeFile (outDir </> "feed.xml") (render $ setManyAttrib (getAttribs (reverse $ take 10 posts)) feedTemplate)
+      return ()
+
 buildSite :: String -> IO ()
 buildSite dir = do
   templates <- directoryGroup (dir </> "_templates") :: IO (STGroup String)
@@ -111,9 +141,11 @@ buildSite dir = do
   outDir <- return (dir </> "_site")
   (doesDirectoryExist outDir >>= (removeDirectoryRecursive outDir) ?? (return ()))
   createDirectory outDir
+  -- copy static files
   mapM (\ f ->
           let outFile = (outDir </> makeRelative dir f) in
           createDirectoryIfMissing True (takeDirectory outFile) >> copyFile f outFile) static
+  -- generate regular pages
   indexTemplate <- return $ fromJust (getStringTemplate "index" templates)
   mapM (\ p -> do
           page <- loadPage p
@@ -121,6 +153,8 @@ buildSite dir = do
           createDirectoryIfMissing True (takeDirectory outFile)
           html <- return $ buildPage indexTemplate page
           writeFile outFile html) pages
+  -- generate posts, post list and atom feed
+  doesDirectoryExist (dir </> "_posts") >>= buildBlog templates (dir </> "_posts") (outDir </> "blog") ?? return ()
 
   return ()
 

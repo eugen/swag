@@ -1,6 +1,50 @@
 % Pandoc User's Guide
+% Eugen
+% 2010
 
-Pandoc is a [Haskell] library for converting from one markup format to
+A First Level Header
+====================
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.prettyprint}
+qsort []     = []
+qsort (x:xs) = qsort (filter (< x) xs) ++ [x] ++ "tsatatar" ++ 
+               qsort (filter (>= x) xs) 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.prettyprint}
+@requires_authorization
+def somefunc(param1, param2):
+  r'''A docstring'''
+  if param1 > param2: # interesting
+    print 'Gre\'ater'
+    print ''
+  return (param2 - param1 + 1) or None
+
+class SomeClass:
+    pass
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+zomg
+
+A Second Level Header
+---------------------
+
+Now is the time for all good men to come to
+the aid of their country. This is just a
+regular paragraph.
+
+The quick brown fox jumped over the lazy
+dog's back.
+
+### Header 3
+
+> This is a blockquote.
+> 
+> This is the second paragraph in the blockquote.
+>
+> ## This is an H2 in a blockquote
+
+*Pandoc* _is_ a [Haskell] library for converting from one markup format to
 another, and a command-line tool that uses this library. It can read
 [markdown] and (subsets of) [reStructuredText], [HTML], and [LaTeX]; and
 it can write [markdown], [reStructuredText], [HTML], [LaTeX], [ConTeXt],

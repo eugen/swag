@@ -6,8 +6,11 @@
     <link rel="stylesheet" type="text/css" href="static/style.css" />
     <link rel="stylesheet" type="text/css" href="../static/style.css" />
     <link href="feed.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" />
+	<script type="text/javascript" src="../static/prettify/prettify.js"></script>
+	<script type="text/javascript" src="../static/prettify/lang-hs.js"></script>
+    <link rel="stylesheet" title="Default" href="../static/prettify/prettify.css">
   </head>
-  <body>
+  <body onload="prettyPrint()">
     <div id="header">
       $header()$
     </div>

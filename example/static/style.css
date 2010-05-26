@@ -93,9 +93,8 @@ ul.articles > li:first-child {
     border: none;
 }
 
-ul.articles li h3 {
-    font-size: 25px;
-    color: rgb(172, 0, 0);
+ul.articles h3 {
+    display: inline;
 }
 
 /****************************/
