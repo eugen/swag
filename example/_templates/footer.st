@@ -1,1 +1,1 @@
-contact me at <a href="mailto:omg@wtf.bbq">omg@wtf.bbq</a>
+by Eugen Anghel (<a href="mailto:eugen@syntactic.org">eugen@syntactic.org</a>)

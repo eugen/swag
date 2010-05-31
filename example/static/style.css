@@ -2,57 +2,89 @@
     margin: 0;
     padding: 0;
     list-style-type: none;
-    font-family: Calibri, Verdana, 'Liberation Sans', 'DejaVu Sans', Sans, sans-serif;
 }
 
-h1, h3 {
-    font-family: 'Cambria', 'DejaVu Serif', serif;
+html { 
+    height: 100%; 
 }
 
 body {
     width: 780px;
     margin-left: auto;
     margin-right: auto;
-    position: relative;
+    font-family: GentiumBookRegular, 'Linux Libertine', 'Liberation', serif;
     font-size: 16px;
+    height: 100%;
 }
 
-a {
-    color: #AA0000;
-    text-decoration: underline !important;
-}
-
-div#header {
-    top: 0px;
-    background-position: 58% 10px;
-    border-top: 2px solid #AA0000;
-    border-bottom: 2px solid #AA0000;
-    padding-bottom: 8px;
-    padding-left: 27%;
-}
-
-div#header h1 {
+h1, h3, a {
     color: #A00;
-    font-size: 33px;
 }
 
-div#header h2 {
-    font-size: 16px;
+h1, h2, h3, h4 {
     font-weight: normal;
 }
 
-div#header em {
+#container {
+    position: relative;
+    min-height: 100%;
+}
+
+#header {
+    top: 0px;
+    border-top: 1px solid #AA0000;
+    border-bottom: 1px solid #AA0000;
+    padding-bottom: 3px;
+    padding-left: 27%;
+    margin-bottom: 10px;
+}
+
+#header h1 {
+    font-size: 53px;
+    font-weight: normal;
+    font-family: GentiumBasicRegular, Sans;
+    line-height: 39px;
+    padding-top: 10px;
+    float: left;
+}
+
+#header h2 {
+    margin: 8px 0 0 14px;
+    line-height: 15px;
+    text-align: bottom;
+    font-size: 16px;
+    font-weight: normal;
+    display: inline-block;
+}
+#sidebar li a, #footer, #footer *, #header h2, #header h2 * {
+    font-family: Inconsolata;
+}
+
+#header em {
     font-style: normal;
     color: #FF0000;
 }
 
-div#content {
+#content {
+    clear: both;
     width: 63%;
     float: right;
     padding-right: 10%;
+    font-size: 16px;
+    line-height: 22px;
+    padding-bottom: 40px;
 }
 
-div#sidebar {
+#content>h2 {
+    font-size: 28px;
+    line-height: 50px;
+}
+
+#content p {
+    padding: 10px 0;
+}
+
+#sidebar {
     padding: 1%;
     float: left;
     width: 23%;
@@ -60,23 +92,20 @@ div#sidebar {
     padding-top: 15px;
 }
 
-div#sidebar h2 {
-    font-size: 20px;
-    font-weight: normal;
-}
-
-div#sidebar li {
+#sidebar li {
     clear: both;
     margin-bottom: 6px;
 }
 
-div#footer {
-    clear: both;
+#footer {
+    position: absolute;
+    bottom: 0;
     width: 63%;
-    float: right;
     padding: 10px 10% 10px 27%;
-    border-top: 2px solid #AA0000;
-    border-bottom: 2px solid #AA0000;
+    border-top: 1px solid #AA0000;
+    border-bottom: 1px solid #AA0000;
+    font-size: 14px;
+    height: 17px;
 }
 
 ul.tags li {
@@ -133,4 +162,8 @@ ul.articles h3 {
     font-size: 12px;
     white-space: nowrap;
     overflow: hidden;
+}
+
+.clear {
+    clear: both;
 }

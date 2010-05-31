@@ -10,6 +10,7 @@ import Data.Time.Calendar
 import Control.Monad
 import Text.StringTemplate
 import Text.Pandoc
+import Text.Pandoc.Shared
 import Data.Bool.Higher
 import System
 import System.IO.Unsafe
@@ -68,6 +69,8 @@ commitDate path = do
   setCurrentDirectory oldcd
   maybe getCurrentTime return (parseTime defaultTimeLocale "%s" dateStr)
 
+pandocWriterOptions =  defaultWriterOptions { writerEmailObfuscation = ReferenceObfuscation }
+
 loadPage :: String -> IO Page
 loadPage path = do
   content <- readFile path
@@ -78,7 +81,7 @@ loadPage path = do
   return $ Page 
          fileName 
          (fromMaybe fileName title)
-         ((writeHtmlString defaultWriterOptions.readMarkdown defaultParserState) content)
+         ((writeHtmlString pandocWriterOptions.readMarkdown defaultParserState) content)
          (fromMaybe commitDate' (parseTime defaultTimeLocale "%Y-%m-%d %H:%M" (fromMaybe ""  published)))
     where loadMeta content line = 
               let ls = lines content in
