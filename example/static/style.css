@@ -1,3 +1,14 @@
+@font-face {
+    font-family: "Biolinum";
+    src: url("BiolinumRegular.ttf");
+    font-weight: normal;
+}
+@font-face {
+    font-family: "Biolinum";
+    src: url("BiolinumBold.ttf");
+    font-weight: bold;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -12,7 +23,7 @@ body {
     width: 780px;
     margin-left: auto;
     margin-right: auto;
-    font-family: GentiumBookRegular, 'Linux Libertine', 'Liberation', serif;
+    font-family: 'Biolinum';
     font-size: 16px;
     height: 100%;
 }
@@ -42,8 +53,8 @@ h1, h2, h3, h4 {
 #header h1 {
     font-size: 53px;
     font-weight: normal;
-    font-family: GentiumBasicRegular, Sans;
-    line-height: 39px;
+    font-family: 'Crimson Text', serif;
+    line-height: 40px;
     padding-top: 10px;
     float: left;
 }
@@ -56,8 +67,15 @@ h1, h2, h3, h4 {
     font-weight: normal;
     display: inline-block;
 }
-#sidebar li a, #footer, #footer *, #header h2, #header h2 * {
-    font-family: Inconsolata;
+
+#header h2, #header h2 * {
+    font-family: Inconsolata, 'Inconsolata', 'Courier New', mono, monospaced;
+    font-size: 13px;
+}
+
+#sidebar li a, #footer, #footer * {
+    font-family: 'Biolinum';
+    font-size: 14px;
 }
 
 #header em {

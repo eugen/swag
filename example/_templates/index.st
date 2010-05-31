@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" >
+<html>
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <title>$title$ - Title</title>
+    <link  href="http://fonts.googleapis.com/css?family=Inconsolata:regular" rel="stylesheet" type="text/css">
+    <link  href="http://fonts.googleapis.com/css?family=Crimson+Text:regular" rel="stylesheet" type="text/css" >
     <link rel="stylesheet" type="text/css" href="static/style.css" />
     <link href="feed.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" />
   </head>
