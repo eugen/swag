@@ -4,7 +4,7 @@
  
 	<title>OMG TITLE</title>
 	<subtitle>Subtitle.</subtitle>
-	<link href="http://example.org/feed/" rel="self" />
+	<link href="http://syntactic.org/feed.xml" rel="self" />
 	<link href="http://example.org/" />
 	<id>http://example.com/blog/index.html</id>
 	<updated>$updatedAtom$</updated>

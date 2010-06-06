@@ -170,3 +170,4 @@ buildSite dir = do
 
   return ()
 
+main = buildSite "."
