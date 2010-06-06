@@ -89,13 +89,13 @@ loadPage path = do
               then Just (ls !! line ~> drop 1 ~> dropWhile (== ' '))
               else Nothing
 
-buildPage :: StringTemplate String -> Page -> String
+buildPage :: STGroup String -> Page -> String
 buildPage template page@(Page file title content published) =
     let
         attributes = [("content", [content]), 
                       ("title", [title]), 
                       ("published", [formatDate published])]
-        templateAttr = setManyAttrib attributes template 
+        templateAttr = setManyAttrib attributes (fromJust $ getStringTemplate "index" template )
     in
        render templateAttr
 
@@ -117,22 +117,32 @@ getAttribs posts = [
  ("postDatesAtom", map (formatDateAtom.pagePublished) posts),
  ("postAddresses", map ((++ ".html").pageFile) posts)]
 
+renameTemplate group oldName newName =
+    mergeSTGroups (groupStringTemplates [(newName, fromJust $ getStringTemplate oldName group)]) group
+                  
+setContentTemplate group tname = renameTemplate group tname "content"
+                
+
 buildBlog :: STGroup String -> FilePath -> FilePath -> IO ()
 buildBlog templates postsDir outDir = 
-    let [postTemplate, blogTemplate, feedTemplate] = map (fromJust.flip getStringTemplate templates) ["post", "blog", "feed"] in
+    let postTemplates = setContentTemplate templates "post"
+        blogTemplate = fromJust $ 
+                       getStringTemplate "index" $ 
+                       setContentTemplate templates "blog"
+        feedTemplate = fromJust $ getStringTemplate "feed" templates
+    in
     do
       posts <- getDirectoryContents postsDir >>= 
                filterM (return.isPageFile) >>= 
                mapM (loadPage.(postsDir </>)) >>= 
                return.(sortBy (\ p1 p2 -> (pagePublished p1) `compare` (pagePublished p2)))
-      createDirectoryIfMissing True outDir
+      createDirectoryIfMissing True (outDir </> "posts")
       -- build each post
       mapM (\ p -> writeFile 
-            (outDir </> (dropExtension (pageFile p)) ++ ".html")
-            (buildPage postTemplate p)) posts
-
+            (outDir </> "posts" </> (dropExtension (pageFile p)) ++ ".html")
+            (buildPage postTemplates p)) posts
       -- build the index
-      writeFile (outDir </> "index.html") (render $ setManyAttrib (getAttribs posts) blogTemplate)
+      writeFile (outDir </> "blog.html") (render $ setManyAttrib (getAttribs posts) blogTemplate)
       -- build the feed
       writeFile (outDir </> "feed.xml") (render $ setManyAttrib (getAttribs (reverse $ take 10 posts)) feedTemplate)
       return ()
@@ -149,15 +159,14 @@ buildSite dir = do
           let outFile = (outDir </> makeRelative dir f) in
           createDirectoryIfMissing True (takeDirectory outFile) >> copyFile f outFile) static
   -- generate regular pages
-  indexTemplate <- return $ fromJust (getStringTemplate "index" templates)
   mapM (\ p -> do
           page <- loadPage p
           outFile <- return (outDir </> makeRelative dir (dropExtensions p) ++ ".html")
           createDirectoryIfMissing True (takeDirectory outFile)
-          html <- return $ buildPage indexTemplate page
+          html <- return $ buildPage (setContentTemplate templates "page") page
           writeFile outFile html) pages
   -- generate posts, post list and atom feed
-  doesDirectoryExist (dir </> "_posts") >>= buildBlog templates (dir </> "_posts") (outDir </> "blog") ?? return ()
+  doesDirectoryExist (dir </> "_posts") >>= buildBlog templates (dir </> "_posts") outDir ?? return ()
 
   return ()
 

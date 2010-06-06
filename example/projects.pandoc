@@ -1,3 +1,5 @@
+% Projects
+
 * Project 1
 * project 2
 * project 5
@@ -7,6 +9,14 @@ Lorem ipsum
 Lorem ipsum dolor sit amet augue. Vestibulum ante felis, dignissim volutpat a, bibendum ac, tempus enim aliquam purus. Aenean quis quam sed molestie sed, imperdiet faucibus sem rutrum id, bibendum eget, eros. Suspendisse diam. Fusce dui aliquam tortor. Praesent nunc. Vestibulum ut enim. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Maecenas eget nisl. Nulla convallis varius. Ut sagittis, metus bibendum mi. Aenean augue leo, suscipit suscipit erat. Nulla tincidunt congue. Lorem ipsum sed nulla quam et ultrices lorem leo, suscipit id, ultrices nec, mattis faucibus. Maecenas nunc. Nam lacus. Ut elit laoreet urna. Aliquam.Lorem ipsum
 
 Lorem ipsum dolor sit amet augue. Vestibulum ante felis, dignissim volutpat a, bibendum ac, tempus enim aliquam purus. Aenean quis quam sed molestie sed, imperdiet faucibus sem rutrum id, bibendum eget, eros. Suspendisse diam. Fusce dui aliquam tortor. Praesent nunc. Vestibulum ut enim. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Maecenas eget nisl. Nulla convallis varius. Ut sagittis, metus bibendum mi. Aenean augue leo, suscipit suscipit erat. Nulla tincidunt congue. Lorem ipsum sed nulla quam et ultrices lorem leo, suscipit id, ultrices nec, mattis faucibus. Maecenas nunc. Nam lacus. Ut elit laoreet urna. Aliquam.Lorem ipsum
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~{.haskell}
+buildSite :: String -> IO ()
+buildSite dir = do
+  templates <- directoryGroup (dir </> "_templates") :: IO (STGroup String)
+                                                50        60        70        80
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Lorem ipsum dolor sit amet augue. Vestibulum ante felis, dignissim volutpat a, bibendum ac, tempus enim aliquam purus. Aenean quis quam sed molestie sed, imperdiet faucibus sem rutrum id, bibendum eget, eros. Suspendisse diam. Fusce dui aliquam tortor. Praesent nunc. Vestibulum ut enim. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Maecenas eget nisl. Nulla convallis varius. Ut sagittis, metus bibendum mi. Aenean augue leo, suscipit suscipit erat. Nulla tincidunt congue. Lorem ipsum sed nulla quam et ultrices lorem leo, suscipit id, ultrices nec, mattis faucibus. Maecenas nunc. Nam lacus. Ut elit laoreet urna. Aliquam.Lorem ipsum
 

@@ -1,7 +1,7 @@
 <ul id="nav">
-<li><a href="/posts.html">Posts</a></li>
+<li><a href="/blog.html">Posts</a></li>
 <li><a href="/projects.html">Projects</a></li>
-<li><a href="/about.html">About Me</a></li>
+<li><a href="/about.html">About</a></li>
 <li><a href="/resume.pdf">Resume</a></li>
 <li id="goodreadsWidget">
   <!-- BEGIN GoodReads widget -->
