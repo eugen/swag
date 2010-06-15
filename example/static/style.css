@@ -43,7 +43,7 @@ body {
     width: 780px;
     margin-left: auto;
     margin-right: auto;
-    font-family: 'Biolinum';
+    font-family: 'Biolinum', sans, sans-serif;
     font-size: 16px;
     height: 100%;
 }
@@ -62,6 +62,7 @@ h1, h2, h3, h4 {
 }
 
 #header {
+    font-family: 'Biolinum', serif;
     top: 0px;
     border-top: 1px solid #AA0000;
     border-bottom: 1px solid #AA0000;
@@ -70,10 +71,13 @@ h1, h2, h3, h4 {
     margin-bottom: 10px;
 }
 
+#header a {
+    text-decoration: none;
+}
+
 #header h1 {
     font-size: 52px;
-    font-weight: normal;
-    font-family: 'Crimson Text', serif;
+    font-weight: bold;
     line-height: 40px;
     padding-top: 10px;
     float: left;
@@ -88,7 +92,7 @@ h1, h2, h3, h4 {
 }
 
 #header h2, #header h2 * {
-    font-family: 'Inconsolata', 'Courier New', mono, monospaced;
+    font-family: 'mplus1m', mono, monospaced;
     font-size: 13px;
 }
 
@@ -101,12 +105,11 @@ pre {
 }
 
 code {
-    font-family: mplus1m;
+    font-family: mplus1m, mono;
     font-size: 13px;
 }
 
 #sidebar li a, #footer, #footer * {
-    font-family: 'Biolinum';
     font-size: 14px;
 }
 
@@ -170,7 +173,7 @@ ul.tags li {
 ul.articles > li {
     padding-top: 10px;
     margin-bottom: 4px;
-    list-style-type: decimal;
+    list-style-type: circle;
     list-style-position: inside;
 }
 

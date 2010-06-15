@@ -142,7 +142,7 @@ buildBlog templates postsDir outDir =
             (outDir </> "posts" </> (dropExtension (pageFile p)) ++ ".html")
             (buildPage postTemplates p)) posts
       -- build the index
-      writeFile (outDir </> "blog.html") (render $ setManyAttrib (getAttribs posts) blogTemplate)
+      writeFile (outDir </> "blog.html") (render $ setManyAttrib (getAttribs (reverse posts)) blogTemplate)
       -- build the feed
       writeFile (outDir </> "feed.xml") (render $ setManyAttrib (getAttribs (reverse $ take 10 posts)) feedTemplate)
       return ()

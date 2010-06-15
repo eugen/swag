@@ -1,1 +1,1 @@
-Made by Eugen Anghel - <a href="mailto:eugen@syntactic.org">eugen@syntactic.org</a>
+by Eugen Anghel - <a href="mailto:eugen@syntactic.org">eugen@syntactic.org</a>
