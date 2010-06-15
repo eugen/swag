@@ -104,6 +104,17 @@ pre {
     padding: 5px 0;
 }
 
+blockquote {
+    margin: 5px 10px;
+    padding: 5px 10px;
+    background-color: #FDFDFD;
+    border: 1px solid #F0F0F0;
+}
+
+#content blockquote p {
+    padding: 3px 0;
+}
+
 code {
     font-family: mplus1m, mono;
     font-size: 13px;
