@@ -20,36 +20,19 @@ import System.Directory
 import System.FilePath 
 import System.Process (readProcess, readProcessWithExitCode)
 
--- utility functions
-(~>) = flip ($)
-infixl 1 ~>
-
+-- utilities
 partitionM :: (Monad m) => (a -> m Bool) -> [a] -> m ([a], [a])
 partitionM f xs = foldM (\ (l,r) e -> return . ((e:l,r) ?? (l,e:r)) =<< f e) ([],[]) $ reverse xs
 
-a >>> b = (unsafePerformIO $ putStrLn $ show a) `seq` b
-p a = (unsafePerformIO $ putStrLn $ take 150 $ show a) `seq` a
-
-ordinalize :: (Integral a) => a -> String
-ordinalize n 
-    | elem n [11..13] = show n ++ "th"
-    | n `mod` 10 == 1 = show n ++ "st"
-    | n `mod` 10 == 2 = show n ++ "nd"
-    | n `mod` 10 == 3 = show n ++ "rd"
-
--- TODO: format dates web2.0-style (e.g. "yesterday", "3 days ago") from javascript;
+-- format a date for displaying it on a page
 formatDate :: UTCTime -> String
 formatDate = formatTime defaultTimeLocale ("%e %B %Y")
 
+-- format a date for inserting into an Atom feed
 formatDateAtom :: UTCTime -> String
 formatDateAtom = formatTime defaultTimeLocale ("%FT%TZ")
 
 -- data declarations
-data Site = Site {
-      sitePages :: [Page], 
-      siteTemplates :: STGroup String
-    }
-
 data Page = Page {
       pageFile :: String, 
       pageTitle :: String,
@@ -57,18 +40,21 @@ data Page = Page {
       pagePublished :: UTCTime
     }
 
--- teh program
+-- returns true if a file should be processed by Swag, 
+--         false if it should be directly copied to the output dir
 isPageFile file = 
     ((== ".pandoc").takeExtension) file
 
-commitDate :: String -> IO UTCTime
-commitDate path = do
+-- gets the git commit date for a file
+getCommitDate :: String -> IO UTCTime
+getCommitDate path = do
   oldcd <- getCurrentDirectory
   setCurrentDirectory $ takeDirectory path
   (exitCode, dateStr, stdErr) <- readProcessWithExitCode "git" ["log", "--format=%at", "-1", (takeFileName path)] ""
   setCurrentDirectory oldcd
   maybe getCurrentTime return (parseTime defaultTimeLocale "%s" dateStr)
 
+-- writer options used by swag
 pandocWriterOptions =  defaultWriterOptions { writerEmailObfuscation = ReferenceObfuscation }
 
 loadPage :: String -> IO Page
@@ -77,16 +63,16 @@ loadPage path = do
   title <- return $ loadMeta content 0
   published <- return $ loadMeta content 2
   fileName <- return (dropExtension $ takeFileName path)
-  commitDate' <- commitDate path
+  commitDate <- getCommitDate path
   return $ Page 
          fileName 
          (fromMaybe fileName title)
          ((writeHtmlString pandocWriterOptions.readMarkdown defaultParserState) content)
-         (fromMaybe commitDate' (parseTime defaultTimeLocale "%Y-%m-%d %H:%M" (fromMaybe ""  published)))
-    where loadMeta content line = 
+         (fromMaybe commitDate (parseTime defaultTimeLocale "%Y-%m-%d %H:%M" (fromMaybe "" published)))
+    where loadMeta content line = -- TODO: support multiline metadatata; also make it more robust 
               let ls = lines content in
               if ((length ls) >= line && head (ls !! line) == '%')
-              then Just (ls !! line ~> drop 1 ~> dropWhile (== ' '))
+              then Just (dropWhile (== ' ') $ drop 1 $ ls !! line)
               else Nothing
 
 buildPage :: STGroup String -> Page -> String
@@ -107,8 +93,8 @@ getFilesR path = do
        then getDirectoryContents path >>= filterM (return.not.(flip elem ['.', '_']).head)  >>= mapM (getFilesR.(path </>)) >>= ((return.join :: [[a]] -> IO [a]))
        else return [path]
 
-
-getAttribs posts = [
+-- gets the attributs required by the main blog page (i.e. 'Posts') and the Atom feed
+getBlogAttribs posts = [
  ("updated", [formatDateAtom $ pagePublished (last posts)]),
  ("updatedAtom", [formatDateAtom $ pagePublished (last posts)]),
  ("postTitles", (map pageTitle posts)),
@@ -117,11 +103,8 @@ getAttribs posts = [
  ("postDatesAtom", map (formatDateAtom.pagePublished) posts),
  ("postAddresses", map ((++ ".html").pageFile) posts)]
 
-renameTemplate group oldName newName =
-    mergeSTGroups (groupStringTemplates [(newName, fromJust $ getStringTemplate oldName group)]) group
-                  
-setContentTemplate group tname = renameTemplate group tname "content"
-                
+setContentTemplate group tname = mergeSTGroups newContentGroup group
+    where newContentGroup = groupStringTemplates [("content", fromJust $ getStringTemplate tname group)]
 
 buildBlog :: STGroup String -> FilePath -> FilePath -> IO ()
 buildBlog templates postsDir outDir = 
@@ -142,9 +125,9 @@ buildBlog templates postsDir outDir =
             (outDir </> "posts" </> (dropExtension (pageFile p)) ++ ".html")
             (buildPage postTemplates p)) posts
       -- build the index
-      writeFile (outDir </> "blog.html") (render $ setManyAttrib (getAttribs (reverse posts)) blogTemplate)
+      writeFile (outDir </> "blog.html") (render $ setManyAttrib (getBlogAttribs (reverse posts)) blogTemplate)
       -- build the feed
-      writeFile (outDir </> "feed.xml") (render $ setManyAttrib (getAttribs (reverse $ take 10 posts)) feedTemplate)
+      writeFile (outDir </> "feed.xml") (render $ setManyAttrib (getBlogAttribs (reverse $ take 10 posts)) feedTemplate)
       return ()
 
 buildSite :: String -> IO ()
