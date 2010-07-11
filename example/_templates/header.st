@@ -1,6 +1,6 @@
 <a href="/">
-  <h1>Syntactic.org</h1>
+  <h1>Example.org</h1>
   <h2>
-    &nbsp;design<em>/</em><br />develop<em>/</em><br /><em>rejoice!</em>
+    enter <br /> subtitle <br /> here
   </h2>
 </a>
